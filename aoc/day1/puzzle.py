@@ -2,9 +2,12 @@ from pathlib import Path
 
 
 def parse_input() -> list[int]:
-    calories = (Path(__file__).parent / "input.txt").read_text().split("\n\n")
+    elves = (Path(__file__).parent / "input.txt").read_text().split("\n\n")
     return list(
-        sorted([sum(map(int, elf.splitlines())) for elf in calories], reverse=True)
+        sorted(
+            [sum(int(item) for item in elf.splitlines()) for elf in elves],
+            reverse=True,
+        )
     )
 
 
