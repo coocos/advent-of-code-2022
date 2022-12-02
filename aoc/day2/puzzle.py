@@ -9,42 +9,38 @@ def parse_input() -> list[tuple[str, str]]:
 
 
 def first(a: str, b: str) -> int:
-
-    mapped = {"X": "A", "Y": "B", "Z": "C"}
-    shape_score = {"A": 1, "B": 2, "C": 3}
-    round_score = {
-        "A": {
+    return {
+        "X": {
             "A": 3,
             "B": 0,
             "C": 6,
         },
-        "B": {
+        "Y": {
             "A": 6,
             "B": 3,
             "C": 0,
         },
-        "C": {"A": 0, "B": 6, "C": 3},
-    }
-    return round_score[mapped[b]][a] + shape_score[mapped[b]]
+        "Z": {"A": 0, "B": 6, "C": 3},
+    }[b][a] + {"X": 1, "Y": 2, "Z": 3}[b]
 
 
 def second(a: str, b: str) -> int:
-
-    mapped = {"X": "L", "Y": "D", "Z": "W"}
-    need = {
-        "A": {
-            "W": "Y",
-            "D": "X",
-            "L": "Z",
-        },
-        "B": {
-            "W": "Z",
-            "D": "Y",
-            "L": "X",
-        },
-        "C": {"W": "X", "D": "Z", "L": "Y"},
-    }
-    return first(a, need[a][mapped[b]])
+    return first(
+        a,
+        {
+            "A": {
+                "Z": "Y",
+                "Y": "X",
+                "X": "Z",
+            },
+            "B": {
+                "Z": "Z",
+                "Y": "Y",
+                "X": "X",
+            },
+            "C": {"Z": "X", "Y": "Z", "X": "Y"},
+        }[a][b],
+    )
 
 
 def solve() -> None:
@@ -52,12 +48,10 @@ def solve() -> None:
     hands = parse_input()
 
     # First part
-    first_score = sum(first(opponent, you) for opponent, you in hands)
-    assert first_score == 12794
+    assert sum(first(a, b) for a, b in hands) == 12794
 
     # Second part
-    second_score = sum(second(opponent, you) for opponent, you in hands)
-    assert second_score == 14979
+    assert sum(second(a, b) for a, b in hands) == 14979
 
 
 if __name__ == "__main__":
