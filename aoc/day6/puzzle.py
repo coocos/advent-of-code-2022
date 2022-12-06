@@ -1,4 +1,5 @@
 from pathlib import Path
+from collections import defaultdict
 
 
 def parse_input() -> str:
@@ -6,9 +7,17 @@ def parse_input() -> str:
 
 
 def marker(stream: str, size: int) -> int:
-    for i in range(len(stream) - size - 1):
-        if len(set(stream[i : i + size])) == size:
-            return i + size
+
+    window: dict[str, int] = defaultdict(int)
+
+    for tail in range(len(stream)):
+        window[stream[tail]] += 1
+        if (head := tail - size) >= 0:
+            window[stream[head]] -= 1
+            if window[stream[head]] == 0:
+                del window[stream[head]]
+        if len(window) == size:
+            return tail + 1
     return -1
 
 
