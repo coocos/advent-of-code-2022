@@ -4,13 +4,6 @@ from dataclasses import dataclass, field
 from typing import Iterable
 
 
-def parse_input() -> list[tuple[str]]:
-    return [
-        tuple(line.split(" "))
-        for line in (Path(__file__).parent / "input.txt").read_text().splitlines()
-    ]
-
-
 @dataclass
 class FileNode:
 
@@ -35,7 +28,14 @@ class DirectoryNode:
                 yield from child.subdirectories()
 
 
-def create_file_system(commands: list[tuple[str]]):
+def parse_input() -> list[tuple[str]]:
+    return [
+        tuple(line.split(" "))
+        for line in (Path(__file__).parent / "input.txt").read_text().splitlines()
+    ]
+
+
+def create_file_system(commands: list[tuple[str]]) -> DirectoryNode:
 
     root = DirectoryNode("/")
     stack = [root]
