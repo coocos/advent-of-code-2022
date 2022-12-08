@@ -1,4 +1,5 @@
 from pathlib import Path
+from math import prod
 
 
 def parse_input() -> list[list[int]]:
@@ -12,8 +13,9 @@ def solve() -> None:
 
     grid = parse_input()
 
-    best = 0
-    count = len(grid) * 4 - 4
+    max_scenic_score = 0
+    visible = len(grid) * 4 - 4
+
     for y in range(1, len(grid) - 1):
         for x in range(1, len(grid) - 1):
             origin = grid[y][x]
@@ -23,46 +25,25 @@ def solve() -> None:
             top = [row[x] for row in list(reversed(grid[:y]))]
             bottom = [row[x] for row in grid[y + 1 :]]
 
-            left_score = 0
-            for cell in left:
-                left_score += 1
-                if cell >= origin:
+            scenic_scores = []
+            for trees in [left, right, top, bottom]:
+                scenic_scores.append(0)
+                for tree in trees:
+                    scenic_scores[-1] += 1
+                    if tree >= origin:
+                        break
+            max_scenic_score = max(max_scenic_score, prod(scenic_scores))
+
+            for trees in [left, right, top, bottom]:
+                if all(tree < origin for tree in trees):
+                    visible += 1
                     break
 
-            right_score = 0
-            for cell in right:
-                right_score += 1
-                if cell >= origin:
-                    break
+    # First part
+    assert visible == 1851
 
-            top_score = 0
-            for cell in top:
-                top_score += 1
-                if cell >= origin:
-                    break
-
-            bottom_score = 0
-            for cell in bottom:
-                bottom_score += 1
-                if cell >= origin:
-                    break
-            best = max(best, left_score * right_score * bottom_score * top_score)
-
-            if all(cell < origin for cell in left):
-                count += 1
-                continue
-            if all(cell < origin for cell in right):
-                count += 1
-                continue
-            if all(cell < origin for cell in top):
-                count += 1
-                continue
-            if all(cell < origin for cell in bottom):
-                count += 1
-                continue
-
-    assert count == 1851
-    assert best == 574080
+    # Second part
+    assert max_scenic_score == 574080
 
 
 if __name__ == "__main__":
