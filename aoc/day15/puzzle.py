@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from itertools import pairwise
 import re
 from pathlib import Path
 
@@ -34,40 +35,52 @@ def parse_input() -> list[Sensor]:
 
 def cannot_contain_beacon(sensors: list[Sensor], y: int) -> int:
 
-    xs = []
+    cannot_contain = set()
     for sensor in sensors:
-        xs += [sensor.pos.x, sensor.beacon.x]
-    xs = list(sorted(xs))
+        diff = abs(y - sensor.pos.y)
+        if diff < sensor.pos.distance(sensor.beacon):
+            start_x = sensor.pos.x - sensor.pos.distance(sensor.beacon) + diff
+            stop_x = sensor.pos.x + sensor.pos.distance(sensor.beacon) - diff
+            for x in range(start_x, stop_x):
+                cannot_contain.add(x)
 
-    max_distance = 0
-    for sensor in sensors:
-        max_distance = max(max_distance, sensor.pos.distance(sensor.beacon))
+    return len(cannot_contain)
 
-    cannot_contain = 0
-    for x in range(xs[0] - max_distance, xs[-1] + max_distance):
+
+def tuning_frequency(sensors: list[Sensor], size: int = 20) -> int:
+
+    for y in range(0, size + 1):
+        ranges = []
         for sensor in sensors:
-            # One beacon exists here so this point can contain by default
-            if sensor.beacon.x == x and sensor.beacon.y == y:
-                break
+            diff = abs(y - sensor.pos.y)
+            if diff < sensor.pos.distance(sensor.beacon):
+                start_x = max(
+                    0, sensor.pos.x - sensor.pos.distance(sensor.beacon) + diff
+                )
+                stop_x = min(
+                    sensor.pos.x + sensor.pos.distance(sensor.beacon) - diff, size
+                )
+                ranges.append((start_x, stop_x))
 
-            distance_here = abs(sensor.pos.x - x) + abs(sensor.pos.y - y)
-            distance_closest = abs(sensor.pos.x - sensor.beacon.x) + abs(
-                sensor.pos.y - sensor.beacon.y
-            )
-            if distance_here <= distance_closest:
-                cannot_contain += 1
-                break
+        ranges.sort(key=lambda r: r[0])
+        start_range = ranges[0]
+        for a, b in ranges[1:]:
+            if a > start_range[1] + 1:
+                return y + (start_range[1] + 1) * 4_000_000
+            start_range = (start_range[0], max(b, start_range[1]))
 
-    return cannot_contain
+    return -1
 
 
 def solve() -> None:
 
     sensors = parse_input()
-    for sensor in sensors:
-        print(sensor)
 
+    # First part
     assert cannot_contain_beacon(sensors, 2_000_000) == 5870800
+
+    # Second part
+    assert tuning_frequency(sensors, 4_000_000) == 10908230916597
 
 
 if __name__ == "__main__":
